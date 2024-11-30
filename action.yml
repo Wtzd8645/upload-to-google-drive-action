@@ -1,0 +1,34 @@
+name: "Upload To Google Drive Action"
+description: "Used for uploading a directory or file to Google Drive. Supports cross-platform."
+author: "Neo Chen"
+
+inputs:
+  credentials:
+    description: "The credentials for Google Drive authentication."
+    required: true
+  src_path:
+    description: "The source path to upload."
+    required: true
+  dest_folder:
+    description: "The destination folder in Google Drive."
+    required: true
+  dest_file_name:
+    description: "The destination file name in Google Drive. If not provided, the source file name from src_path will be used."
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 'latest'
+
+    - name: Upload To Google Drive
+      env:
+        credentials: ${{ inputs.credentials }}
+        src_path: ${{ inputs.src_path }}
+        dest_folder: ${{ inputs.dest_folder }}
+        dest_file_name: ${{ inputs.dest_file_name }}
+      shell: ${{ runner.os == 'Windows' && 'powershell' || 'bash' }}
+      run: npm install googleapis && node ${{ github.action_path }}/upload-to-google-drive.js

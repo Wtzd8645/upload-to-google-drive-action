@@ -1,0 +1,20 @@
+{
+  "name": "upload-to-google-drive-action",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "build": "npx ncc build index.js -o dist"
+  },
+  "keywords": [],
+  "author": "Neo Chen",
+  "license": "MIT",
+  "dependencies": {
+    "archiver": "latest",
+    "googleapis": "latest"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "latest"
+  }
+}

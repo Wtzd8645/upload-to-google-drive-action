@@ -31,4 +31,4 @@ runs:
         dest_folder: ${{ inputs.dest_folder }}
         dest_file_name: ${{ inputs.dest_file_name }}
       shell: ${{ runner.os == 'Windows' && 'powershell' || 'bash' }}
-      run: npm install googleapis && node ${{ github.action_path }}/upload-to-google-drive.js
+      run: node ${{ github.action_path }}/dist/index.js

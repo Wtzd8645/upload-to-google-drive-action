@@ -1,4 +1,4 @@
-import { createReadStream, createWriteStream, lstatSync } from 'fs';
+import { createReadStream, createWriteStream, lstatSync, promises } from 'fs';
 import { google } from 'googleapis';
 import { basename, dirname, extname, join } from 'path';
 import archiver from 'archiver';
@@ -14,40 +14,93 @@ const auth = new google.auth.JWT(credentialsJson.client_email, null, credentials
 const googleDriveClient = google.drive({ version: 'v3', auth });
 
 async function main() {
+  let fileName;
+  let filePath;
+  let isCompressed = false;
   try {
     if (lstatSync(srcPath).isDirectory()) {
-      const fileName = `${destFileName || basename(srcPath)}.zip`
-      const filePath = join(dirname(srcPath), `${fileName}`);
-      await compress(srcPath, filePath);
-      await uploadFile(filePath, fileName);
+      fileName = `${destFileName || basename(srcPath)}.zip`
+      filePath = join(dirname(srcPath), `${fileName}`);
+      await compressFile(srcPath, filePath);
+      isCompressed = true;
     }
     else {
       const ext = extname(srcPath);
-      const fileName = `${destFileName || basename(srcPath, ext)}${ext}`;
-      await uploadFile(srcPath, fileName);
+      fileName = `${destFileName || basename(srcPath, ext)}${ext}`;
+      filePath  = join(dirname(srcPath), fileName);
     }
+
+    const fileSize = lstatSync(filePath).size;
+    await ensureSpace(fileSize);
+    await uploadFile(filePath, fileName);
   } catch (error) {
     console.error(error.message);
     process.exit(1);
+  } finally {
+    if (isCompressed && filePath) {
+      try {
+        console.log(`Deleting compressed file: ${filePath}`);
+        await promises.unlink(filePath);
+      } catch (error) {
+        console.error(`Failed to delete compressed file: ${error.message}`);
+      }
+    }
   }
 }
 
-function compress(sourcePath, outputPath) {
+function compressFile(src, dest) {
+  console.log(`Compressing file. Source: ${src}, Destination: ${dest}`);
   const archive = archiver('zip', { zlib: { level: 9 } });
-  const stream = createWriteStream(outputPath);
-
+  const stream = createWriteStream(dest);  
   return new Promise((resolve, reject) => {
-    stream.on('close', resolve);
+    archive.on('end', () => console.log('Compression completed.'));
     archive.on('error', err => reject(err));
+    stream.on('close', resolve);
     stream.on('error', err => reject(err));
 
-    archive.directory(sourcePath, false);
+    archive.directory(src, false);
     archive.pipe(stream);
     archive.finalize();
   });
 }
 
+async function ensureSpace(size) {
+  const { data } = await googleDriveClient.about.get({ fields: 'storageQuota' });
+  const limit = parseInt(data.storageQuota.limit) || Number.MAX_SAFE_INTEGER;
+  const usage = parseInt(data.storageQuota.usage);  
+  let files = [];
+  let space = limit - usage;
+  console.log(`Free space: ${space}, Required space: ${size}`);
+  while (space < size) {
+    files = await listFiles();
+    if (files.length === 0) {
+      break;
+    }
+
+    for (const file of files) {
+      console.log(`Deleting file. Id: ${file.id}, Name: ${file.name}, Size: ${file.size}`);
+      await googleDriveClient.files.delete({ fileId: file.id });
+      
+      space += parseInt(file.size);
+      if (space >= size) {
+        break;
+      }
+    }
+  }
+}
+
+async function listFiles() {
+  const { data } = await googleDriveClient.files.list({
+    q: `"${credentialsJson.client_email}" in owners and trashed = false`,
+    fields: 'files(id, name, size)',
+    orderBy: 'createdTime asc',
+    pageSize: 1000,
+  });
+  return data.files;
+}
+
 async function uploadFile(filePath, fileName) {
+  console.log(`Uploading file. FilePath: ${filePath}, Destination: ${destFolder}`);
   const fileStream = createReadStream(filePath);
   await googleDriveClient.files.create({
     requestBody: {

@@ -70,7 +70,7 @@ async function ensureSpace(size) {
   const usage = parseInt(data.storageQuota.usage);  
   let files = [];
   let space = limit - usage;
-  console.log(`Free space: ${space}, Required space: ${size}`);
+  console.log(`Ensuring space. Free space: ${space}, Required space: ${size}`);
   while (space < size) {
     files = await listFiles();
     if (files.length === 0) {

@@ -3,6 +3,8 @@ import { google } from 'googleapis';
 import { basename, dirname, extname, join } from 'path';
 import archiver from 'archiver';
 
+const autoDelete = process.env.auto_delete === 'true';
+const isSharedDrive = process.env.is_shared_drive === 'true';
 const credentials = process.env.credentials;
 const srcPath = process.env.src_path;
 const destFolder = process.env.dest_folder;
@@ -30,8 +32,11 @@ async function main() {
       filePath = srcPath;
     }
 
-    const fileSize = lstatSync(filePath).size;
-    await ensureSpace(drive, credentialsJson, fileSize);
+    if (autoDelete) {
+      const fileSize = lstatSync(filePath).size;
+      await ensureSpace(drive, credentialsJson, fileSize);
+    }
+    
     await uploadFile(drive, filePath, fileName);
   } catch (error) {
     console.error(error.message);
@@ -110,6 +115,7 @@ async function uploadFile(drive, filePath, fileName) {
     media: {
       body: fileStream
     },
+    supportsAllDrives: `${isSharedDrive}`
   });
 }
 

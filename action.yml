@@ -1,13 +1,18 @@
 name: "Upload To Google Drive Action"
 description: "Used for uploading a directory or file to Google Drive. Supports cross-platform."
 author: "Neo Chen"
-
 inputs:
+  is_shared_drive:
+    description: "Whether the destination folder is in a shared drive. Defaults to false."
+    default: "false"
+  auto_delete:
+    description: "Whether to delete the source file after uploading. Defaults to false."
+    default: "false"
   credentials:
-    description: "The credentials for Google Drive authentication."
+    description: "The credentials for Google Drive authentication in base64 format." 
     required: true
   src_path:
-    description: "The source path to upload."
+    description: "The source path to upload. Can be a file or a directory."
     required: true
   dest_folder:
     description: "The destination folder in Google Drive."
@@ -15,7 +20,6 @@ inputs:
   dest_file_name:
     description: "The destination file name in Google Drive. If not provided, the source file name from src_path will be used."
     default: ""
-
 runs:
   using: "composite"
   steps:
@@ -23,9 +27,10 @@ runs:
       uses: actions/setup-node@v4
       with:
         node-version: 'lts/*'
-
     - name: Upload To Google Drive
       env:
+        is_shared_drive: ${{ inputs.is_shared_drive }}
+        auto_delete: ${{ inputs.auto_delete }}
         credentials: ${{ inputs.credentials }}
         src_path: ${{ inputs.src_path }}
         dest_folder: ${{ inputs.dest_folder }}

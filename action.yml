@@ -6,10 +6,10 @@ inputs:
     description: "Whether the destination folder is in a shared drive. Defaults to false."
     default: "false"
   auto_delete:
-    description: "Whether to delete the source file after uploading. Defaults to false."
+    description: "When the GSA's storage reaches its capacity, files will be automatically deleted, starting with the oldest. Defaults to false."
     default: "false"
   credentials:
-    description: "The credentials for Google Drive authentication in base64 format." 
+    description: "The credentials for Google Drive authentication in Base64 format." 
     required: true
   src_path:
     description: "The source path to upload. Can be a file or a directory."

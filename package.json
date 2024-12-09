@@ -1,15 +1,20 @@
 {
   "name": "upload-to-google-drive-action",
   "version": "1.0.0",
-  "description": "",
+  "description": "Used for uploading a directory or file to Google Drive. Supports cross-platform.",
+  "keywords": [
+    "github",
+    "actions",
+    "cicd",
+    "google-drive"
+  ],
+  "author": "Neo Chen",
+  "license": "MIT",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "build": "npx ncc build index.js -o dist"
   },
-  "keywords": [],
-  "author": "Neo Chen",
-  "license": "MIT",
   "dependencies": {
     "archiver": "latest",
     "googleapis": "latest"

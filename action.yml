@@ -9,7 +9,7 @@ inputs:
     description: "When the GSA's storage reaches its capacity, files will be automatically deleted, starting with the oldest. Defaults to false."
     default: "false"
   credentials:
-    description: "The credentials for Google Drive authentication in Base64 format." 
+    description: "The credentials for Google Drive authentication in Base64 format."
     required: true
   src_path:
     description: "The source path to upload. Can be a file or a directory."
@@ -26,7 +26,7 @@ runs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 'lts/*'
+        node-version: "lts/*"
     - name: Upload To Google Drive
       env:
         is_shared_drive: ${{ inputs.is_shared_drive }}
@@ -36,4 +36,5 @@ runs:
         dest_folder: ${{ inputs.dest_folder }}
         dest_file_name: ${{ inputs.dest_file_name }}
       shell: ${{ runner.os == 'Windows' && 'powershell' || 'bash' }}
-      run: node ${{ github.action_path }}/dist/index.js
+      working-directory: ${{ github.action_path }}
+      run: npm run start

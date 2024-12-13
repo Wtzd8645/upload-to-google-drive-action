@@ -10,17 +10,17 @@ Used for uploading a directory or file to Google Drive. Supports cross-platform.
   - Add the GSA's email to the destination folder's access permissions.
 
 ### Inputs
-- **is_shared_drive (Optional)**: Whether the destination folder is in a shared drive. Defaults to false.
-- **auto_delete (Required)**: When the GSA's storage reaches its capacity, files will be automatically deleted, starting with the oldest. Defaults to false.
-- **credentials (Optional)**: The credentials for Google Drive authentication in Base64 format.
+- **is_shared_drive (Optional)**: Whether the destination folder is in a shared drive. Defaults to ```false```.
+- **auto_delete (Optional)**: When the GSA's storage reaches its capacity, files will be automatically deleted, starting with the oldest. Defaults to ```false```.
+- **credentials (Required)**: The credentials for Google Drive authentication in Base64 format.
 - **src_path (Required)**: The source path to upload. Can be a file or a directory.
-- **dest_folder (Optional)**: The destination folder in Google Drive.
-- **dest_file_name**: The destination file name in Google Drive. If not provided, the source file name from src_path will be used.
+- **dest_folder (Required)**: The destination folder in Google Drive.
+- **dest_file_name (Optional)**: The destination file name in Google Drive. If not provided, the file name from ```<src_path>``` will be used.
 
 ### Usage
 ```yaml
 - name: Upload to Google Drive
-  uses: Wtzd8645/upload-to-google-drive-action@v1
+  uses: Wtzd8645/upload-to-google-drive-action@v2
   with:
     credentials: ${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}
     src_path: ${{ github.workspace }}/my-dir
